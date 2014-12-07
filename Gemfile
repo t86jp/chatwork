@@ -11,3 +11,5 @@ group :development do
   gem "vcr"
   gem "simplecov"
 end
+
+gem 'thor'

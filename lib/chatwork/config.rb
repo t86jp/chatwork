@@ -30,8 +30,9 @@ module Chatwork
       unless yaml.instance_of?(Hash)
         raise Error::ConfigError, '%s file is not yaml format' % [(file.is_a?(File) ? file.to_path : file)]
       end
+
       yaml.each do |k,v|
-        self[k.to_sym] = v
+        self[k.to_sym] = v.is_a?(Hash) ? Hash[v.map{|vk,vv| [vk.to_sym, vv]}] : v
       end
       @loaded = true
 

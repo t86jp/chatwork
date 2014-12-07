@@ -1,0 +1,46 @@
+#!/usr/bin/env ruby
+# -*- encoding: utf-8 -*-
+
+if RUBY_VERSION <= '1.9.0'
+  $KCODE = 'UTF-8'
+  require 'kconv'
+end
+
+require 'fcntl'
+require 'thor'
+$LOAD_PATH.push(File.join(Dir.pwd, 'lib'))
+require 'chatwork'
+
+class ChatworkCLI < Thor
+  desc 'room [ROOM_ID|ROOM_NAME]', 'グループになにかやる系'
+  option :message, :aliases => :m
+  def room(query)
+    find_key = query.match(/^\d+$/) ? 'id' : 'name'
+    room = Chatwork::Room.find do |r|
+      r[find_key] == query
+    end
+
+    message = read_multi(:message)
+    case true
+    when !!message
+      room.message(message)
+    else
+      puts "room_id: %d\n" % [room.id]
+    end
+  end
+
+  private
+  def read_multi(key)
+    case true
+    when !!options[key]
+      options[key]
+    when STDIN.fcntl(Fcntl::F_GETFL, 0) == 0
+      $stdin.read.chomp
+    else
+      nil
+    end
+  end
+end
+
+Chatwork::Config.instance.load!
+ChatworkCLI.start(ARGV)
