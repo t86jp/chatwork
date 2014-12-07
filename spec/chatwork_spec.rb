@@ -105,7 +105,7 @@ describe Chatwork::Authentication do
     EOM
   end
   before :each do
-    init_session('{}')
+    described_class.logout
   end
 
   context 'session?' do
@@ -144,7 +144,7 @@ describe Chatwork::Authentication do
         Chatwork::Config.instance.load!(f)
         VCR.use_cassette('top_page_after_login') do
           expect(described_class).not_to be_session
-          described_class.authenticated('/') {}
+          described_class.authenticated('/')
           expect(described_class).to be_session
         end
       end
@@ -154,8 +154,72 @@ describe Chatwork::Authentication do
         Chatwork::Config.instance.load!(f)
         VCR.use_cassette('login_fail') do
           expect(described_class).not_to be_session
-          expect { described_class.authenticated('/') {} }.to raise_error(Chatwork::Error::LoginError)
+          expect { described_class.authenticated('/') }.to raise_error(Chatwork::Error::LoginError)
           expect(described_class).not_to be_session
+        end
+      end
+    end
+  end
+end
+
+describe Chatwork::API do
+  LOGIN_USER = {
+    :good => {:email => ENV['CHATWORK_DEV_EMAIL'], :password => ENV['CHATWORK_DEV_PASSWORD']},
+    :bad  => {:email => 'user@email', :password => 'pass'}
+  }
+  context 'get method' do
+    it 'should send the command' do
+      temp_config({:login => LOGIN_USER[:good]}) do |f|
+        Chatwork::Config.instance.load!(f)
+        VCR.use_cassette('cmd_get_social_info') do
+          res = described_class.get('get_social_info')
+          expect(res).to be_is_a Hash
+          expect(res).to be_key 'status'
+        end
+      end
+    end
+  end
+  context 'post method' do
+    it 'should send the command' do
+      temp_config({:login => LOGIN_USER[:good]}) do |f|
+        Chatwork::Config.instance.load!(f)
+        VCR.use_cassette('cmd_send_chat') do
+          body = '{"text":"test message","room_id":"2268470"}'
+          res = described_class.post('send_chat', {pdata:body})
+          expect(res).to be_is_a Hash
+        end
+      end
+    end
+  end
+end
+
+describe Chatwork::Room do
+  LOGIN_USER = {
+    :good => {:email => ENV['CHATWORK_DEV_EMAIL'], :password => ENV['CHATWORK_DEV_PASSWORD']},
+    :bad  => {:email => 'user@email', :password => 'pass'}
+  }
+  context 'get method' do
+    it 'should send the command' do
+      temp_config({:login => LOGIN_USER[:good]}) do |f|
+        Chatwork::Config.instance.load!(f)
+        VCR.use_cassette('cmd_init_load') do
+          room = described_class.find do |r|
+            r['name'] == 'マイチャット'
+          end
+          expect(room.name).to eq 'マイチャット'
+        end
+      end
+    end
+  end
+  context 'message' do
+    it 'should post a new message' do
+      temp_config({:login => LOGIN_USER[:good]}) do |f|
+        Chatwork::Config.instance.load!(f)
+        VCR.use_cassette('cmd_post_new_message') do
+          room = described_class.find do |r|
+            r['name'] == 'マイチャット'
+          end
+          expect(room.message('Hello!')).to be true
         end
       end
     end
