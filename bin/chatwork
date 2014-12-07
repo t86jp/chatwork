@@ -8,6 +8,7 @@ end
 
 require 'fcntl'
 require 'thor'
+require 'highline'
 $LOAD_PATH.push(File.join(Dir.pwd, 'lib'))
 require 'chatwork'
 
@@ -27,6 +28,19 @@ class ChatworkCLI < Thor
     else
       puts "room_id: %d\n" % [room.id]
     end
+  end
+
+  desc 'init', '設定初期化'
+  def init()
+    ui = HighLine.new
+    login = {}
+    login[:email] = ui.ask('メールアドレス: ').to_s
+    login[:password] = ui.ask('パスワード: ') {|q| q.echo = false }.to_s
+
+    config = Chatwork::Config.instance
+    config[:login] = login
+    config.save!
+    puts '設定ファイルを作成しました。 %s' % [config.default_config]
   end
 
   private
