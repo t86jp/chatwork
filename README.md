@@ -2,7 +2,7 @@
 
   $ gem install chatwork
   
-  $ chatwork init
+  $ chatwork setup
   
   $ chatwork room マイチャット -m 'Hello'
   

@@ -30,12 +30,13 @@ class ChatworkCLI < Thor
     end
   end
 
-  desc 'init', '設定初期化'
-  def init()
+  desc 'setup', '設定初期化'
+  def setup()
     ui = HighLine.new
     login = {}
-    login[:email] = ui.ask('メールアドレス: ').to_s
-    login[:password] = ui.ask('パスワード: ') {|q| q.echo = false }.to_s
+    puts "ログイン設定\n"
+    login[:email] = ui.ask('  メールアドレス: ').to_s
+    login[:password] = ui.ask('  パスワード: ') {|q| q.echo = false }.to_s
 
     config = Chatwork::Config.instance
     config[:login] = login
