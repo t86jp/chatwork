@@ -1,5 +1,6 @@
 $LOAD_PATH.unshift(File.join(File.dirname(__FILE__), '..', 'lib'))
 $LOAD_PATH.unshift(File.dirname(__FILE__))
+require 'rubygems'
 require 'rspec'
 require 'chatwork'
 require 'webmock/rspec'
@@ -13,7 +14,7 @@ Dir["#{File.dirname(__FILE__)}/support/**/*.rb"].each {|f| require f}
 
 VCR.configure do |c|
   c.default_cassette_options = {
-    match_requests_on: [:uri, :body, :method]
+    'match_requests_on' => [:uri, :body, :method]
   }
   c.cassette_library_dir = 'spec/fixtures/vcr'
   c.hook_into :webmock

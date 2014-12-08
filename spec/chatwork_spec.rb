@@ -185,7 +185,7 @@ describe Chatwork::API do
         Chatwork::Config.instance.load!(f)
         VCR.use_cassette('cmd_send_chat') do
           body = '{"text":"test message","room_id":"2268470"}'
-          res = described_class.post('send_chat', {pdata:body})
+          res = described_class.post('send_chat', {'pdata' => body})
           expect(res).to be_is_a Hash
         end
       end

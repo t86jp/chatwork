@@ -41,10 +41,10 @@ module Chatwork
     public
     def message(message)
       body = {
-        room_id: id,
-        text: message
+        :room_id => id,
+        :text => message
       }
-      response = Chatwork::API.post('send_chat', {pdata: JSON.dump(body)})
+      response = Chatwork::API.post('send_chat', {'pdata' => JSON.dump(body)})
       response.is_a?(Hash) && response['status']['success']
     end
   end
